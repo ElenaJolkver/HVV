@@ -2,13 +2,34 @@ from fastapi import FastAPI, Form, Depends
 
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from sqlalchemy.orm import Session
+from sqlalchemy import create_engine
 
-from models import AirPollutionData, SessionLocal, engine, Base
+from sqlalchemy.orm import sessionmaker, Session
+
+from app.models import AirPollutionData, SessionLocal, engine, Base
 
 import pandas as pd
 
+import os
+
 app = FastAPI()
+
+# Define the path to the database
+
+
+db_path = os.path.join(os.path.dirname(__file__), 'airpollution.db')
+
+DATABASE_URL = f"sqlite:///{db_path}"
+
+
+# Create the SQLAlchemy engine
+
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+# Create a configured "Session" class
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Create the database tables
 
 Base.metadata.create_all(bind=engine)
 
@@ -77,13 +98,13 @@ async def main(db: Session = Depends(get_db)):
 
         <br><br> 
 
-        <label for="start_year">Select start year (optional, min year of data 1750):</label> 
+        <label for="start_year">Select start year (optional):</label> 
 
         <input type="number" name="start_year" id="start_year" min="1750" max="2022"> 
 
         <br><br> 
 
-        <label for="end_year">Select end year (optional, max year of data 2022):</label> 
+        <label for="end_year">Select end year (optional):</label> 
 
         <input type="number" name="end_year" id="end_year" min="1750" max="2022"> 
 

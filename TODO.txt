@@ -1,0 +1,2 @@
+the dockerized version is not running from within docker. But the app runs with
+python -m app.main
