@@ -6,7 +6,7 @@ from models import AirPollutionData, SessionLocal
 
 
 def load_data():
-    df = pd.read_csv('data/air-pollution.csv')
+    df = pd.read_csv('../data/air-pollution.csv')
 
     df.columns = df.columns.str.strip()  # Remove any leading/trailing whitespace from column names
 
