@@ -1,2 +1,2 @@
-the dockerized version is not running from within docker. But the app runs with
+Execute the main.py script without docker:
 python -m app.main

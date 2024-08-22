@@ -11,25 +11,15 @@ class AirPollutionData(Base):
     __tablename__ = 'air_pollution_data'
 
     id = Column(Integer, primary_key=True, index=True)
-
     entity = Column(String, index=True)
-
     code = Column(String)
-
     year = Column(Integer)
-
     nitrogen_oxide = Column(Float)
-
     sulphur_dioxide = Column(Float)
-
     carbon_monoxide = Column(Float)
-
     organic_carbon = Column(Float)
-
     nmvoc = Column(Float)
-
     black_carbon = Column(Float)
-
     ammonia = Column(Float)
 
 

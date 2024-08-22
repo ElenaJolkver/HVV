@@ -38,6 +38,7 @@ To start the application from within docker, you need the docker daemon to run.
 
 #Go to directory containing “Dockerfile”, build docker container by running in terminal:
 
+docker build -t hvv_docker .
 
 #Running the app in docker
 docker run -p 8000:8000  --rm hvv_docker
