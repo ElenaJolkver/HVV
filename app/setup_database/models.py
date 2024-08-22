@@ -33,7 +33,7 @@ class AirPollutionData(Base):
     ammonia = Column(Float)
 
 
-DATABASE_URL = "sqlite:///./airpollution.db"
+DATABASE_URL = "sqlite:///./data/airpollution.db"
 
 engine = create_engine(DATABASE_URL)
 
