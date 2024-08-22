@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from app.models import AirPollutionData, SessionLocal
+from app.setup_database.models import AirPollutionData, SessionLocal
 
 
 def verify_data():

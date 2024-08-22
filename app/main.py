@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 
 from sqlalchemy.orm import sessionmaker, Session
 
-from app.models import AirPollutionData, SessionLocal, engine, Base
+from app.setup_database.models import AirPollutionData, SessionLocal, Base
 
 import pandas as pd
 
