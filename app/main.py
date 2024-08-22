@@ -132,64 +132,66 @@ async def main(db: Session = Depends(get_db)):
 
 @app.post("/get_stats/")
 async def get_stats(entity: str = Form(...), parameter: str = Form(...), start_year: int = Form(None),
-
                     end_year: int = Form(None)):
-    # Define the route to handle form submission and redirect to the stats page.
-
     if parameter in ["nitrogen_oxide", "sulphur_dioxide", "carbon_monoxide", "organic_carbon", "nmvoc", "black_carbon",
-
                      "ammonia"]:
-        # Check if the selected parameter is valid.
+
         if start_year and end_year:
-            # Check if both start and end years are provided.
+
             if start_year < 1750 or end_year > 2022:
                 return HTMLResponse(content="<p>Year range must be between 1750 and 2022</p>")
-                # Return an error message if the year range is invalid.
+
             return RedirectResponse(url=f"/data/{entity}/{start_year}/{end_year}/{parameter}/stats", status_code=303)
-            # Redirect to the stats page with the specified year range.
 
         else:
+
             return RedirectResponse(url=f"/data/{entity}/all/{parameter}/stats", status_code=303)
-            # Redirect to the stats page for all years.
 
     else:
+
         return HTMLResponse(content="<p>Invalid parameter selected</p>")
-        # Return an error message if the parameter is invalid.
 
 
 @app.get("/data/{entity}/{start_year}/{end_year}/{parameter}/stats", response_class=HTMLResponse)
 async def get_stats(entity: str, start_year: int, end_year: int, parameter: str, db: Session = Depends(get_db)):
-    # Define the route to display statistics for a specific year range.
-    # Query the database for the specified entity and year range.
-    data = db.execute(
-        select(AirPollutionData)
-        .where(AirPollutionData.entity == entity)
-        .where(AirPollutionData.year >= start_year)
-        .where(AirPollutionData.year <= end_year)
-    ).fetchall()
+    data = db.query(AirPollutionData).filter(
 
-    # Return an error message if no data is found.
+        AirPollutionData.entity == entity,
+
+        AirPollutionData.year >= start_year,
+
+        AirPollutionData.year <= end_year
+
+    ).all()
+
     if not data:
         return HTMLResponse(content="<p>Data not found</p>")
 
-    # Convert the query result to a pandas DataFrame.
-    df = pd.DataFrame([row.__dict__ for row in data])
-    # Calculate the mean, median, and standard deviation for the parameter.
+    df = pd.DataFrame([d.__dict__ for d in data])
+
     mean = df[parameter].mean()
+
     median = df[parameter].median()
+
     stddev = df[parameter].std()
 
-    # Return the statistics as an HTML response.
-    return HTMLResponse(content=f"""   
+    return HTMLResponse(content=f""" 
 
-    <p>Statistics for {parameter.replace('_', ' ')} for {entity} from {start_year} to {end_year}:</p>  
-    <ul>   
-        <li>Mean: {mean}</li>  
-        <li>Median: {median}</li>  
+    <p>Statistics for {parameter.replace('_', ' ')} for {entity} from {start_year} to {end_year}:</p> 
+
+    <ul> 
+
+        <li>Mean: {mean}</li> 
+
+        <li>Median: {median}</li> 
+
         <li>Standard Deviation: {stddev}</li> 
-    </ul>   
+
+    </ul> 
 
     """)
+
+
 
 
 @app.get("/data/{entity}/all/{parameter}/stats", response_class=HTMLResponse)
