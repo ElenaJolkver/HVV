@@ -36,6 +36,7 @@ verify_data.py checks that the database has been populated properly
 
 To start the application from within docker, you need the docker daemon to run.
 
+```
 #Go to directory containing “Dockerfile”, build docker container by running in terminal:
 
 docker build -t hvv_docker .
@@ -46,7 +47,7 @@ docker run -p 8000:8000  --rm hvv_docker
 Your app is now running at http://localhost:8000/
 
 #To stop the container, head back to the terminal where docker is running and press ctrl+c.
-
+```
 
 ## Adding Data
 
