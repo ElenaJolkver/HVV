@@ -4,25 +4,25 @@ FROM python:3.12
 
 # Set the working directory in the container
 
-WORKDIR /app
+WORKDIR /src
 
+# Install Poetry
+RUN pip install --no-cache-dir poetry
 
+# Copy the pyproject.toml and poetry.lock files (if available) into the container
+COPY pyproject.toml poetry.lock* ./
 
-# Copy the requirements file into the container
+# Configure Poetry
 
-COPY requirements.txt .
-
-
-
-# Install any needed packages specified in requirements.txt
-
-RUN pip install --no-cache-dir -r requirements.txt
-
-
+RUN poetry config virtualenvs.create false
 
 # Copy the current directory contents into the container at /app
 
 COPY . .
+
+
+# Install dependencies using Poetry
+RUN poetry install --no-dev --no-interaction --no-ansi
 
 
 

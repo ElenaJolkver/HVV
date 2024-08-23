@@ -2,7 +2,7 @@ import pandas as pd
 
 from sqlalchemy.orm import Session
 
-from models import AirPollutionData, SessionLocal
+from app.setupdatabase.models import AirPollutionData, SessionLocal
 
 
 def load_data():
