@@ -1,5 +1,5 @@
 # FastAPI is used to create the web application and handle HTTP requests.
-from fastapi import FastAPI, Form, Depends
+from fastapi import FastAPI, Form, Depends, HTTPException
 
 # HTMLResponse and RedirectResponse are used to return HTML content and handle redirects.
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -19,6 +19,11 @@ import pandas as pd
 # OS module is used to handle file paths and directory operations.
 import os
 
+# Pydantic is used for data validation and settings management using Python type annotations.
+from pydantic import BaseModel
+
+import logging
+
 # Initialize the FastAPI application.
 app = FastAPI()
 
@@ -37,17 +42,28 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Create the database tables based on the models.
 Base.metadata.create_all(bind=engine)
 
+# Define a Pydantic model for input validation.
+class AirPollutionDataCreate(BaseModel):
+    entity: str
+    year: int
+    nitrogen_oxide: float
+    sulphur_dioxide: float
+    carbon_monoxide: float
+    organic_carbon: float
+    nmvoc: float
+    black_carbon: float
+    ammonia: float
 
 def get_db():
     # Create a new database session.
     db = SessionLocal()
-
     try:
         yield db  # Yield the session for dependency injection.
     finally:
         db.close()  # Ensure the session is closed after use.
 
 
+# Endpoint to display the main form.
 @app.get("/", response_class=HTMLResponse)
 async def main(db: Session = Depends(get_db)):
     # Query distinct entities from the database.
@@ -83,7 +99,7 @@ async def main(db: Session = Depends(get_db)):
     # Return the HTML content as a response.
     return HTMLResponse(content=content)
 
-
+# Endpoint to handle form submission and redirect the appropriate statistics page
 @app.post("/get_stats/")
 async def get_stats(entity: str = Form(...), start_year: int = Form(None), end_year: int = Form(None)):
     if start_year and end_year:
@@ -94,7 +110,7 @@ async def get_stats(entity: str = Form(...), start_year: int = Form(None), end_y
     else:
         return RedirectResponse(url=f"/data/{entity}/all/stats", status_code=303)
 
-
+# Endpoint to get statistics for a specific entity and year range
 @app.get("/data/{entity}/{start_year}/{end_year}/stats", response_class=HTMLResponse)
 async def get_stats(entity: str, start_year: int, end_year: int, db: Session = Depends(get_db)):
     data = db.query(AirPollutionData).filter(
@@ -126,14 +142,15 @@ async def get_stats(entity: str, start_year: int, end_year: int, db: Session = D
         stats[parameter]["median"] = median
         stats[parameter]["stddev"] = stddev
 
-        # Generate the HTML content for the statistics
+    # Generate the HTML content for the statistics
     stats_html = "".join([
         f""" 
         <h3>{'Non-methane Volatile Organic Compounds (NMVOC)' if param == 'nmvoc' 
         else 'Nitrogen Oxide (NOx)' if param == 'nitrogen_oxide' 
         else 'Carbon monoxide (CO)' if param == 'carbon_monoxide' 
         else 'Sulphur dioxide (SO₂)' if param == 'sulphur_dioxide' 
-        else 'Ammonia (NH₃)' if param == 'ammonia' else param.replace('_', ' ').title()}</h3> 
+        else 'Ammonia (NH₃)' if param == 'ammonia' 
+        else param.replace('_', ' ').title()}</h3> 
         <ul> 
             <li>Mean: {stats[param]['mean']}</li>
             <li>Median: {stats[param]['median']}</li> 
@@ -143,29 +160,25 @@ async def get_stats(entity: str, start_year: int, end_year: int, db: Session = D
     ])
 
     # Return the statistics as an HTML response.
-
     return HTMLResponse(content=f""" 
     <p>Statistics for all parameters for {entity} from {start_year} to {end_year}:</p> 
     {stats_html} 
     """)
 
-
+# Endpoint to get statistics for a specific entity for all years
 @app.get("/data/{entity}/all/stats", response_class=HTMLResponse)
 async def get_stats_all(entity: str, db: Session = Depends(get_db)):
     # List of parameters to calculate statistics for
-
     parameters = [
         "nitrogen_oxide", "sulphur_dioxide", "carbon_monoxide",
         "organic_carbon", "nmvoc", "black_carbon", "ammonia"
     ]
 
     # Initialize a dictionary to store the statistics
-
     stats = {param: {"mean": None, "median": None, "stddev": None} for param in parameters}
 
     for parameter in parameters:
         # Calculate the mean for the parameter directly in the database.
-
         mean = db.query(func.avg(getattr(AirPollutionData, parameter))).filter(
             AirPollutionData.entity == entity).scalar()
 
@@ -223,6 +236,58 @@ async def get_stats_all(entity: str, db: Session = Depends(get_db)):
     <p>Statistics for all parameters for {entity} for all years:</p> 
     {stats_html} 
     """)
+
+
+# Endpoint to add new air pollution data.
+@app.post("/data")
+async def create_data(data: AirPollutionDataCreate, db: Session = Depends(get_db)):
+    logging.info(f"Recieved data: {data}")
+    # Create a new AirPollutionData instance from the input data.
+    db_data = AirPollutionData(**data.dict())
+    db.add(db_data)  # Add the new data to the session.
+    db.commit()  # Commit the transaction to save the data.
+    db.refresh(db_data)  # Refresh the instance to get the updated data.
+    logging.info(f"Data added to DB: {data}")
+    return db_data  # Return the newly created data.
+
+
+# Endpoint to update existing air pollution data.
+@app.put("/data/{entity}/{year}")
+async def update_data(entity: str, year: int, data: AirPollutionDataCreate, db: Session = Depends(get_db)):
+    # Query the existing data by entity and year.
+    db_data = db.query(AirPollutionData).filter(
+        AirPollutionData.entity == entity,
+        AirPollutionData.year == year
+    ).first()
+
+    if not db_data:
+        raise HTTPException(status_code=404, detail="Data not found")
+        # Update the data with the new values.
+    for key, value in data.dict().items():
+        setattr(db_data, key, value)
+
+    db.commit()  # Commit the transaction to save the changes.
+    db.refresh(db_data)  # Refresh the instance to get the updated data.
+    return db_data  # Return the updated data.
+
+
+# Endpoint to delete existing air pollution data.
+@app.delete("/data/{entity}/{year}", response_class=HTMLResponse)
+async def delete_data(entity: str, year: int, db: Session = Depends(get_db)):
+    # Query the database for the specific data point
+    data_point = db.query(AirPollutionData).filter(
+        AirPollutionData.entity == entity,
+        AirPollutionData.year == year
+    ).first()
+
+    # If the data point is not found, raise a 404 error
+    if not data_point:
+        raise HTTPException(status_code=404, detail="Data point not found")
+        # Delete the data point from the database
+    db.delete(data_point)
+    db.commit()
+    # Return a success message
+    return HTMLResponse(content=f"<p>Data point for {entity} in {year} has been deleted successfully.</p>")
 
 
 if __name__ == "__main__":
