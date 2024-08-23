@@ -2,6 +2,6 @@ Execute the main.py script without docker:
 python -m app.main
 poetry run python -m src.app.main
 
+fixing poetry issue:
 $Env:Path += ";C:\Users\Elena Jolkver\AppData\Roaming\Python\Scripts"; setx PATH "$Env:Path"
 
-git remote add origin git@github.com:ElenaJolkver/HVV.git/'
