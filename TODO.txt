@@ -1,2 +1,5 @@
 Execute the main.py script without docker:
 python -m app.main
+poetry run python -m src.app.main
+
+$Env:Path += ";C:\Users\Elena Jolkver\AppData\Roaming\Python\Scripts"; setx PATH "$Env:Path"
