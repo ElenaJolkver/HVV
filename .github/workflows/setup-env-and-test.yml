@@ -1,0 +1,30 @@
+name: Test in Poetry environment
+
+on:
+  push:
+    branches:
+      - Develop
+      - ci_cd_infrastructure
+
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip-ci]')"
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.12
+
+    - name: Install dependencies
+      run: |
+        make create_environment
+    
+    - name: run tests
+      run: |
+        make test
