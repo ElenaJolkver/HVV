@@ -1,36 +1,109 @@
 # REST API for air pollution data
 
-This application makes the air-pollution dataset from https://www.kaggle.com/datasets/rejeph/air-pollution accessible. It provides a landing page where the user can select a country from the dataset, the air pollutant and a year range (optional). Selecting the parameters and pressing "Go" directs the user to a result page.
+This application makes the air-pollution dataset from 
+https://www.kaggle.com/datasets/rejeph/air-pollution accessible. 
+It provides a landing page where the user can select a country 
+from the dataset, the air pollutant and a year range (optional).
+Selecting the parameters and pressing "Go" directs the user to a result page, 
+showing the mean, median, and standard deviation for 7 core airpollution parameters.
 
 ## Project Setup
 
 The project is packaged within a docker container. The project structure is:
 
 ```
-air_pollution_project
-│   README.md
-│   requirements.txt
-│   Dockerfile    
-│
-└───app
-│   │   main.py
-│   │
-│   └───setup_database
-│       │   models.py
-│       │   load_data.py
-│       │   verify_data.py
-│   
-└───data
-    │   air-pollution.csv
-
+air_pollution_project 
+├── Dockerfile 
+├── Makefile 
+├── poetry.lock 
+├── pyproject.toml 
+├── README.md 
+├── data 
+│   ├── air-pollution.csv 
+│   ├── air-pollution_cleaned.csv 
+│   └── check_clean_airpollution.py 
+├── src 
+│   ├── app 
+│   │   ├── airpollution.db 
+│   │   ├── main.py 
+│   │   └── __init__.py 
+│   └── setup_database 
+│       ├── load_data.py 
+│       ├── models.py 
+│       ├── verify_data.py 
+│       └── __init__.py 
+└── tests 
+    ├── test_main.py 
+    └── __init__.py 
 ```
+ 
+
+### Root Directory 
+
+  
+
+- **Dockerfile**: Instructions to build a Docker image for the project. 
+
+- **Makefile**: Automates build tasks. 
+
+- **poetry.lock**: Ensures exact versions of dependencies. 
+
+- **pyproject.toml**: Configuration for Poetry. 
+
+- **README.md**: Project overview and instructions. 
+
+  
+
+### [`data`](command:_github.copilot.openSymbolFromReferences?%5B%22data%22%2C%5B%7B%22uri%22%3A%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22Untitled-2%22%2C%22_sep%22%3A1%2C%22external%22%3A%22untitled%3AUntitled-2%22%2C%22path%22%3A%22Untitled-2%22%2C%22scheme%22%3A%22untitled%22%7D%2C%22pos%22%3A%7B%22line%22%3A23%2C%22character%22%3A28%7D%7D%5D%5D "Go to definition") Directory 
+
+  
+
+- **air-pollution.csv**: Raw air pollution data. 
+
+- **air-pollution_cleaned.csv**: Cleaned air pollution data. 
+
+- **check_clean_airpollution.py**: Script to clean and verify data. 
+
+  
+
+### `src` Directory 
+
+  
+
+- **`app` Directory**: 
+
+  - **airpollution.db**: SQLite database file. 
+
+  - **main.py**: Main application script to control FastAPI REST API. 
+
+  - **__init__.py**: Initialization file for the `app` package. 
+
+  
+
+- **`setup_database` Directory**: 
+
+  - **load_data.py**: Script to load data into the database. 
+It populates the airpollution.db from the data/air-pollution_cleaned.csv file, 
+  after downloading data from https://www.kaggle.com/datasets/rejeph/air-pollution?resource=download and cleaning it with data/check_clean_airpollution.py
+
+  - **models.py**: SQLAlchemy models for database tables. 
+  Script to define the database schema and to set up the connection to the SQLite database airpollution.db using SQLAlchemy. 
+
+  - **verify_data.py**: Script to verify that the database has been populated. 
+
+  - **__init__.py**: Initialization file for the `setup_database` package. 
+
+  
+
+### `tests` Directory 
+
+  
+
+- **test_main.py**: Unit tests for the main application logic. 
+
+- **__init__.py**: Initialization file for the `tests` package. 
 
 
-main.py script to control FastAPI REST API.
-The other files are not needed to run the API, but were used to setup the database. 
-models.py is responsible for defining the database schema and setting up the connection to the SQLite database airpollution.db using SQLAlchemy.
-load_data.py script populates the airpollution.db from the data/air-pollution.csv file, downloaded from https://www.kaggle.com/datasets/rejeph/air-pollution?resource=download
-verify_data.py checks that the database has been populated properly
 
 ## Application Execution
 
@@ -49,7 +122,7 @@ Your app is now running at http://localhost:8000/
 #To stop the container, head back to the terminal where docker is running and press ctrl+c.
 ```
 
-## Adding Data
+## Adding Data to Database
 
 Adding data with curl
 
@@ -88,7 +161,7 @@ $body = @{
 
 Invoke-WebRequest -Uri "http://localhost:8000/data" -Method POST -Headers $headers -Body $body
 ```
-## Update Data
+## Update Database
 
 Updating data with curl:
 ```
@@ -132,7 +205,7 @@ $response = Invoke-WebRequest -Uri $url -Method PUT -Headers $headers -Body $bod
 # Output the response 
 $response.Content 
 ```
-## Deleting Data
+## Deleting Data from Database
 
 Delete data with curl
 
@@ -163,7 +236,17 @@ if ($response.StatusCode -eq 200) {
 
 ## Initial Setup of the Database
 
-The dataset from https://www.kaggle.com/datasets/rejeph/air-pollution was initially checked and missing data (country codes) were manually cleaned. The output is stored under data/air-pollution_cleaned.csv. The editing is documented in data/check_clean_airpollution.py.
+The dataset from https://www.kaggle.com/datasets/rejeph/air-pollution was 
+initially checked and missing data (country codes) were manually cleaned. 
+The output is stored under data/air-pollution_cleaned.csv. The editing is 
+documented in data/check_clean_airpollution.py.
 
-In order to demonstarte the app's interaction with a database, an SQLAlchemy database, airpollution.db was created from data/air-pollution_cleaned.csv. SQLAlchemy is a SQL toolkit and Object-Relational Mapping (ORM) library for Python. It is used here to create a database, manage database sessions and to query the database. To setup the database, execute the scripts setup_database/models.py and setup_models/load_data.py. If you want to check that the database has been filled, run setup_models/verify_data.py. 
+In order to demonstrate the app's interaction with a database, an SQLite 
+database, airpollution.db was created from data/air-pollution_cleaned.csv. 
+The interaction with the DB is performed via SQLAlchemy, which is a SQL toolkit library for 
+Python. It is used here to create the database, manage database sessions and to 
+query the database. 
+To setup the database, execute the scripts setup_database/models.py and 
+setup_models/load_data.py. If you want to check that the database has been 
+filled, run setup_models/verify_data.py. 
  

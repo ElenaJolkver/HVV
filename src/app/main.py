@@ -85,13 +85,13 @@ async def main(db: Session = Depends(get_db)):
                 {entity_options} 
             </select> 
             <br><br> 
-            <label for="start_year">Select start year (optional):</label> 
+            <label for="start_year">Select start year (optional). Statistics is calculated including provided year. Minimum is 1750:</label> 
             <input type="number" name="start_year" id="start_year" min="1750" max="2022"> 
             <br><br> 
-            <label for="end_year">Select end year (optional):</label> 
+            <label for="end_year">Select end year (optional). Statistics is calculated including provided year. Maximum is 2022:</label> 
             <input type="number" name="end_year" id="end_year" min="1750" max="2022">
             <br><br> 
-            <input type="submit" value="GO"> 
+            <input type="submit" value="Show Statistics"> 
         </form> 
     </body> 
     """
