@@ -122,6 +122,8 @@ async def get_stats(entity: str, start_year: int, end_year: int, db: Session = D
     if not data:
         return HTMLResponse(content="<p>Data not found</p>")
 
+    # In contrast to the calculation across all years, here, we take the approach of calculating median/sd by pandas directly.
+    # This shall demonstrate another option and work well with small datasets, in contrast to the more extended selection
     df = pd.DataFrame([d.__dict__ for d in data])
 
     # List of parameters to calculate statistics for
@@ -131,7 +133,6 @@ async def get_stats(entity: str, start_year: int, end_year: int, db: Session = D
     ]
 
     # Initialize a dictionary to store the statistics
-
     stats = {param: {"mean": None, "median": None, "stddev": None} for param in parameters}
 
     for parameter in parameters:
@@ -184,10 +185,19 @@ async def get_stats_all(entity: str, db: Session = Depends(get_db)):
 
         # Custom SQL query to calculate the median
         median_query = text(f""" 
-            SELECT {parameter} FROM air_pollution_data 
-            WHERE entity = :entity 
-            ORDER BY {parameter} 
-            LIMIT 1 OFFSET (SELECT COUNT(*) FROM air_pollution_data WHERE entity = :entity) / 2 
+            WITH ranked_data AS ( 
+                SELECT {parameter},
+                       ROW_NUMBER() OVER (ORDER BY {parameter}) AS row_num, 
+                       COUNT(*) OVER () AS total_rows 
+                FROM air_pollution_data 
+                WHERE entity = :entity 
+            ) 
+            SELECT AVG({parameter}) AS median_value
+            FROM ranked_data 
+            WHERE row_num IN ( 
+                (total_rows + 1) / 2,
+                (total_rows + 2) / 2 
+            ) 
         """)
 
         median_result = db.execute(median_query, {"entity": entity}).fetchone()
@@ -196,9 +206,14 @@ async def get_stats_all(entity: str, db: Session = Depends(get_db)):
 
         # Custom SQL query to calculate the standard deviation
         stddev_query = text(f""" 
-            SELECT sqrt(avg((t.{parameter} - m.avg_{parameter}) * (t.{parameter} - m.avg_{parameter}))) as stddev 
-            FROM air_pollution_data t, 
-            (SELECT avg({parameter}) as avg_{parameter} FROM air_pollution_data WHERE entity = :entity) m 
+            WITH avg_data AS ( 
+                SELECT avg({parameter}) as avg_{parameter} 
+                FROM air_pollution_data 
+                WHERE entity = :entity 
+            ) 
+            SELECT sqrt(sum(power(t.{parameter} - avg_data.avg_{parameter}, 2)) / nullif(count(*) - 1, 0)) as stddev 
+            FROM air_pollution_data t 
+            JOIN avg_data ON 1=1 
             WHERE t.entity = :entity 
         """)
 
@@ -211,7 +226,6 @@ async def get_stats_all(entity: str, db: Session = Depends(get_db)):
         stats[parameter]["median"] = median
         stats[parameter]["stddev"] = stddev
 
-        # Generate the HTML content for the statistics
         # Generate the HTML content for the statistics
 
     stats_html = "".join([
