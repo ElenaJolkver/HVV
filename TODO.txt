@@ -7,3 +7,27 @@ $Env:Path += ";C:\Users\Elena Jolkver\AppData\Roaming\Python\Scripts"; setx PATH
 
 test git
 
+
+
+
+
+docker build -t hvv_docker .
+
+#Running the app in docker
+docker run -d -p 8000:8000 -v "$(pwd)/logs:/app/src/app/logs" hvv_docker
+cat logs/app.log
+
+Your app is now running at http://localhost:8000/
+
+#get docker container ID
+docker ps
+
+#add data
+
+docker exec -it 1149ac4ce33a curl -X POST "http://localhost:8000/data" -H "Content-Type: application/json" -d '{\"entity\": \"An Example Entity\", \"year\": 2023, \"nitrogen_oxide\": 10.5, \"sulphur_dioxide\": 5.2, \"carbon_monoxide\": 3.1, \"organic_carbon\": 2.0, \"nmvoc\": 1.5, \"black_carbon\": 0.8, \"ammonia\": 0.6}'
+###
+#update
+docker exec -it 1149ac4ce33a curl -X PUT "http://localhost:8000/data/An%20Example%20Entity/2023" -H "Content-Type: application/json" -d '{\"entity\": \"An Example Entity\", \"year\": 2023, \"nitrogen_oxide\": 100.5, \"sulphur_dioxide\": 55.2, \"carbon_monoxide\": 34.1, \"organic_carbon\": 27.0, \"nmvoc\": 1.5, \"black_carbon\": 0.8, \"ammonia\": 0.6}'
+
+#delete
+docker exec -it 09a242c2a98c curl -X DELETE "http://localhost:8000/data/An%20Example%20Entity/2023"

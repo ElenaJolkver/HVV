@@ -111,16 +111,20 @@ To start the application from within docker, you need the docker daemon to run.
 
 ```
 #Go to directory containing “Dockerfile”, build docker container by running in terminal:
-
 docker build -t hvv_docker .
 
-#Running the app in docker
-docker run -p 8000:8000  --rm hvv_docker
-
-Your app is now running at http://localhost:8000/
-
-#To stop the container, head back to the terminal where docker is running and press ctrl+c.
+#Running the app in docker while exposing the logs folder
+docker run -d -p 8000:8000 -v "$(pwd)/logs:/app/src/app/logs" hvv_docker
 ```
+Your app is now running at http://localhost:8000/. 
+The app is equipped with a logging documentation, which you can access via 
+
+```
+cat logs/app.log
+```
+
+
+To stop the container, head back to the terminal where docker is running and press ctrl+c.
 
 ## Adding Data to Database
 
@@ -160,6 +164,14 @@ $body = @{
 } | ConvertTo-Json
 
 Invoke-WebRequest -Uri "http://localhost:8000/data" -Method POST -Headers $headers -Body $body
+```
+
+Please remember, if you are executing this app from within docker, to add an entry to the database, execute the curl command via docker:
+```
+#get docker container ID
+docker ps
+# add entry
+docker exec -it <your docker container ID> curl -X POST "http://localhost:8000/data" -H "Content-Type: application/json" -d '{\"entity\": \"An Example Entity\", \"year\": 2023, \"nitrogen_oxide\": 10.5, \"sulphur_dioxide\": 5.2, \"carbon_monoxide\": 3.1, \"organic_carbon\": 2.0, \"nmvoc\": 1.5, \"black_carbon\": 0.8, \"ammonia\": 0.6}'
 ```
 ## Update Database
 
@@ -205,6 +217,14 @@ $response = Invoke-WebRequest -Uri $url -Method PUT -Headers $headers -Body $bod
 # Output the response 
 $response.Content 
 ```
+
+Please remember, if you are executing this app from within docker, to update an entry in the database, execute the curl command via docker:
+```
+#get docker container ID
+docker ps
+# update entry
+docker exec -it <your docker container ID> curl -X PUT "http://localhost:8000/data/An%20Example%20Entity/2023" -H "Content-Type: application/json" -d '{\"entity\": \"An Example Entity\", \"year\": 2023, \"nitrogen_oxide\": 100.5, \"sulphur_dioxide\": 55.2, \"carbon_monoxide\": 34.1, \"organic_carbon\": 27.0, \"nmvoc\": 1.5, \"black_carbon\": 0.8, \"ammonia\": 0.6}'
+```
 ## Deleting Data from Database
 
 Delete data with curl
@@ -231,7 +251,13 @@ if ($response.StatusCode -eq 200) {
 } else { 
     Write-Output "Failed to delete data point. Status code: $($response.StatusCode)" 
 }
-
+```
+Please remember, if you are executing this app from within docker, to delete an entry in the database, execute the curl command via docker:
+```
+#get docker container ID
+docker ps
+# delete entry
+docker exec -it <your docker container ID> curl -X DELETE "http://localhost:8000/data/An%20Example%20Entity/2023"
 ``` 
 
 ## Initial Setup of the Database
