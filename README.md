@@ -160,3 +160,10 @@ if ($response.StatusCode -eq 200) {
 }
 
 ``` 
+
+## Initial Setup of the Database
+
+The dataset from https://www.kaggle.com/datasets/rejeph/air-pollution was initially checked and missing data (country codes) were manually cleaned. The output is stored under data/air-pollution_cleaned.csv. The editing is documented in data/check_clean_airpollution.py.
+
+In order to demonstarte the app's interaction with a database, an SQLAlchemy database, airpollution.db was created from data/air-pollution_cleaned.csv. SQLAlchemy is a SQL toolkit and Object-Relational Mapping (ORM) library for Python. It is used here to create a database, manage database sessions and to query the database. To setup the database, execute the scripts setup_database/models.py and setup_models/load_data.py. If you want to check that the database has been filled, run setup_models/verify_data.py. 
+ 
