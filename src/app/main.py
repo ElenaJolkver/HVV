@@ -36,7 +36,6 @@ from datetime import datetime
 
 # Create a logger
 logger = logging.getLogger("my_logger")
-
 logger.setLevel(logging.INFO)
 
 # Create a file handler that logs messages to a file
@@ -57,7 +56,6 @@ app = FastAPI()
 # Log application start
 logger.info(f"Application started at {datetime.now()}")
 
-
 # Register a function to log application end
 def log_app_end():
     logger.info(f"Application ended at {datetime.now()}")
@@ -77,7 +75,6 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Create the database tables based on the models.
 Base.metadata.create_all(bind=engine)
-
 
 # Define a Pydantic model for input validation.
 class AirPollutionDataCreate(BaseModel):
@@ -170,7 +167,7 @@ async def get_stats(entity: str, start_year: int, end_year: int, db: Session = D
         if not data:
             return HTMLResponse(content="<p>Data not found</p>")
         # In contrast to the calculation across all years, here, we take the approach of calculating median/sd by pandas directly.
-        # This shall demonstrate another option and work well with small datasets, in contrast to the more extended selection
+        # This shall demonstrate another option and work well with small datasets, in contrast to the extended selection, assuming a large database in the real use case
         df = pd.DataFrame([d.__dict__ for d in data])
 
         # List of parameters to calculate statistics for
@@ -231,9 +228,10 @@ async def get_stats_all(entity: str, db: Session = Depends(get_db)):
         stats = {param: {"mean": None, "median": None, "stddev": None} for param in parameters}
 
         for parameter in parameters:
-            # Calculate the mean for the parameter directly in the database.
+            # Calculate the mean for the parameter directly in the database, function avg available
             mean = db.query(func.avg(getattr(AirPollutionData, parameter))).filter(
                 AirPollutionData.entity == entity).scalar()
+
             # Custom SQL query to calculate the median
             median_query = text(f"""
             WITH ranked_data AS (
@@ -252,8 +250,8 @@ async def get_stats_all(entity: str, db: Session = Depends(get_db)):
             """)
 
             median_result = db.execute(median_query, {"entity": entity}).fetchone()
-
             median = median_result[0] if median_result else None
+
             # Custom SQL query to calculate the standard deviation
             stddev_query = text(f"""
             WITH avg_data AS (
@@ -264,7 +262,8 @@ async def get_stats_all(entity: str, db: Session = Depends(get_db)):
             SELECT sqrt(sum(power(t.{parameter} - avg_data.avg_{parameter}, 2)) / nullif(count(*) - 1, 0)) as stddev
             FROM air_pollution_data t
             JOIN avg_data ON 1=1
-            WHERE t.entity = :entity """)
+            WHERE t.entity = :entity 
+            """)
 
             stddev_result = db.execute(stddev_query, {"entity": entity}).fetchone()
             stddev = stddev_result[0] if stddev_result else None
@@ -275,7 +274,6 @@ async def get_stats_all(entity: str, db: Session = Depends(get_db)):
             stats[parameter]["stddev"] = stddev
 
         # Generate the HTML content for the statistics
-
         stats_html = "".join([
             f"""
             <h3>{'Non-methane Volatile Organic Compounds (NMVOC)' if param == 'nmvoc'
@@ -330,7 +328,7 @@ async def update_data(entity: str, year: int, data: AirPollutionDataCreate, db: 
         if not db_data:
             raise HTTPException(status_code=404, detail="Data not found")
 
-            # Update the data with the new values.
+        # Update the data with the new values.
         for key, value in data.dict().items():
             setattr(db_data, key, value)
 
@@ -380,4 +378,3 @@ if __name__ == "__main__":
 
     # Run the FastAPI application on host 0.0.0.0 and port 8000.
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
