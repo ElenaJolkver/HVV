@@ -24,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         make create_environment
-    
+
     - name: run tests
       run: |
         make test

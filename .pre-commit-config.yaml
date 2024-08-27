@@ -1,7 +1,7 @@
 repos:
   # pre-commit-hooks
   - repo: "https://github.com/pre-commit/pre-commit-hooks"
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-added-large-files # checks for large files
       - id: check-merge-conflict #checks for merge conflicts
@@ -17,7 +17,7 @@ repos:
 
   # black
   - repo: https://github.com/psf/black
-    rev: 24.3.0
+    rev: 24.8.0
     hooks:
       - id: black
         name: black
@@ -43,7 +43,7 @@ repos:
 
   # flake8
   - repo: https://github.com/pycqa/flake8
-    rev: 7.0.0
+    rev: 7.1.1
     hooks:
       - id: flake8 # runs flake8
         files: .*\.py$
@@ -60,7 +60,7 @@ repos:
 
   # mypy
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.9.0 # Use the sha / tag you want to point at
+    rev: v1.11.2 # Use the sha / tag you want to point at
     hooks:
       - id: mypy
         args: [--config-file, pyproject.toml]
