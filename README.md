@@ -115,6 +115,7 @@ docker build -t hvv_docker .
 
 #Running the app in docker while exposing the logs folder
 docker run -d -p 8000:8000 -v "$(pwd)/logs:/app/src/app/logs" hvv_docker
+docker run -d -p 8000:8000 hvv_docker
 ```
 Your app is now running at http://localhost:8000/. 
 The app is equipped with a logging documentation, which you can access via 

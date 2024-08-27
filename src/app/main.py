@@ -1,3 +1,9 @@
+# OS module is used to handle file paths and directory operations.
+import os
+
+# Check if app is running within docker or directly, some directories need to be adressed differently
+SECRET_KEY = os.environ.get("AM_I_IN_A_DOCKER_CONTAINER", "").lower() in ("yes", "y", "on", "true", "1")
+
 # FastAPI is used to create the web application and handle HTTP requests.
 from fastapi import FastAPI, Form, Depends, HTTPException
 
@@ -11,13 +17,13 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import create_engine, select, func, text
 
 # Importing the database models and session configuration.
-from app.setup_database.models import AirPollutionData, SessionLocal, Base
+if SECRET_KEY:
+    from app.setup_database.models import AirPollutionData, SessionLocal, Base
+else:
+    from setup_database.models import AirPollutionData, SessionLocal, Base #when executing the file directly, without docker
 
 # Pandas is used for data manipulation and analysis.
 import pandas as pd
-
-# OS module is used to handle file paths and directory operations.
-import os
 
 # Pydantic is used for data validation and settings management using Python type annotations.
 from pydantic import BaseModel
@@ -39,7 +45,11 @@ logger = logging.getLogger("my_logger")
 logger.setLevel(logging.INFO)
 
 # Create a file handler that logs messages to a file
-log_file = "/app/src/app/logs/app.log"
+if SECRET_KEY:
+    log_file = "/app/src/app/logs/app.log"
+else:
+    log_file = os.path.join(os.path.dirname(__file__), '../..', 'logs/app.log') #when executing the file directly, without docker
+
 file_handler = RotatingFileHandler(log_file, maxBytes=2000, backupCount=5)
 file_handler.setLevel(logging.INFO)
 
