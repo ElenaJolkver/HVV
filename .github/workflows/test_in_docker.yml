@@ -30,13 +30,19 @@ jobs:
       run: |
         echo "container_id=$(docker ps -qf 'ancestor=hvv_docker')" >> $GITHUB_ENV
 
+    - name: Get Docker container IP
+      id: get_docker_ip
+      run: |
+        echo "container_ip=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${{ env.container_id }})" >> $GITHUB_ENV
+
+
     - name: Test POST with curl
       run: |
-        docker exec ${{ env.container_id }} curl -X POST "http://localhost:8000/data" -H "Content-Type: application/json" -d '{"entity": "An Example Entity", "year": 2023, "nitrogen_oxide": 10.5, "sulphur_dioxide": 5.2, "carbon_monoxide": 3.1, "organic_carbon": 2.0, "nmvoc": 1.5, "black_carbon": 0.8, "ammonia": 0.6}'
+        docker exec ${{ env.container_id }} curl -X POST "http://${{ env.container_ip }}:8000/data" -H "Content-Type: application/json" -d '{"entity": "An Example Entity", "year": 2023, "nitrogen_oxide": 10.5, "sulphur_dioxide": 5.2, "carbon_monoxide": 3.1, "organic_carbon": 2.0, "nmvoc": 1.5, "black_carbon": 0.8, "ammonia": 0.6}'
 
     - name: Test DELETE with curl
       run: |
-        docker exec ${{ env.container_id }} curl -X DELETE "http://localhost:8000/data/An%20Example%20Entity/2023"
+        docker exec ${{ env.container_id }} curl -X DELETE "http://${{ env.container_ip }}:8000/data/An%20Example%20Entity/2023"
 
     - name: Stop and remove Docker container
       run: |
