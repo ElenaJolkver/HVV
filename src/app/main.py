@@ -17,10 +17,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import create_engine, select, func, text
 
 # Importing the database models and session configuration.
-if SECRET_KEY:
-    from app.setup_database.models import AirPollutionData, SessionLocal, Base
-else:
-    from setup_database.models import AirPollutionData, SessionLocal, Base #when executing the file directly, without docker
+from app.setup_database.models import AirPollutionData, SessionLocal, Base
 
 # Pandas is used for data manipulation and analysis.
 import pandas as pd
@@ -120,26 +117,26 @@ async def main(db: Session = Depends(get_db)):
 
         # Generate the HTML content for the form.
         content = f"""
-        <body>  
-            <header>  
-                <h1>Welcome to Air Pollution Data Viewer</h1>   
-                <p>Select an entity and optionally a year range to view the summary statistics</p>  
-            </header> 
-            <form action="/get_stats/" method="post">  
-                <label for="entity">Select an entity:</label>  
-                <select name="entity" id="entity">   
-                    {entity_options}   
-                </select>  
-                <br><br>  
-                <label for="start_year">Select start year (optional). Statistics is calculated including provided year. Minimum is 1750:</label> 
-                <input type="number" name="start_year" id="start_year" min="1750" max="2022">   
-                <br><br>   
-                <label for="end_year">Select end year (optional). Statistics is calculated including provided year. Maximum is 2022:</label> 
-                <input type="number" name="end_year" id="end_year" min="1750" max="2022"> 
-                <br><br>   
-                <input type="submit" value="Show Statistics">   
-            </form>   
-        </body>  
+        <body>
+           <header>
+               <h1>Welcome to Air Pollution Data Viewer</h1>
+               <p>Select an entity and optionally a year range to view the summary statistics</p>    
+           </header>
+           <form action="/get_stats/" method="post">
+               <label for="entity">Select an entity:</label>
+               <select name="entity" id="entity" required>
+                   {entity_options}
+               </select>
+               <br><br>
+               <label for="start_year">Select start year (optional). Statistics is calculated including provided year. Minimum is 1750:</label>   
+               <input type="number" name="start_year" id="start_year" min="1750" max="2022" step="1" pattern="\\d{4}">     
+               <br><br>     
+               <label for="end_year">Select end year (optional). Statistics is calculated including provided year. Maximum is 2022:</label>   
+               <input type="number" name="end_year" id="end_year" min="1750" max="2022" step="1" pattern="\\d{4}">   
+               <br><br>     
+               <input type="submit" value="Show Statistics">     
+           </form>     
+        </body>    
         """
 
         # Return the HTML content as a response.
@@ -166,6 +163,8 @@ async def get_stats(entity: str = Form(...), start_year: int = Form(None), end_y
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 # Endpoint to get statistics for a specific entity and year range
+
+
 @app.get("/data/{entity}/{start_year}/{end_year}/stats", response_class=HTMLResponse)
 async def get_stats(entity: str, start_year: int, end_year: int, db: Session = Depends(get_db)):
     try:
@@ -223,8 +222,6 @@ async def get_stats(entity: str, start_year: int, end_year: int, db: Session = D
     except Exception as e:
         logger.error("Error in get_stats endpoint", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal Server Error")
-
-# Endpoint to get statistics for a specific entity for all years
 @app.get("/data/{entity}/all/stats", response_class=HTMLResponse)
 async def get_stats_all(entity: str, db: Session = Depends(get_db)):
     try:

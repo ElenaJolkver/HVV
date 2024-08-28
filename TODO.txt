@@ -1,6 +1,7 @@
 Execute the main.py script without docker:
 python -m app.main
 poetry run python -m src.app.main
+poetry run python -m app.main
 
 fixing poetry issue:
 $Env:Path += ";C:\Users\Elena Jolkver\AppData\Roaming\Python\Scripts"; setx PATH "$Env:Path"
@@ -31,3 +32,79 @@ docker exec -it 1149ac4ce33a curl -X PUT "http://localhost:8000/data/An%20Exampl
 
 #delete
 docker exec -it 09a242c2a98c curl -X DELETE "http://localhost:8000/data/An%20Example%20Entity/2023"
+
+
+
+<p>Statistics for all parameters for Germany for all years:</p>
+
+            <h3>Nitrogen Oxide (NOx)</h3>
+            <ul>
+                <li>Mean: 835898.9519184211</li>
+                <li>Median: 682937.25</li>
+                <li>Standard Deviation: 848463.5564769426</li>
+            </ul>
+
+            <h3>Sulphur dioxide (SO₂)</h3>
+            <ul>
+                <li>Mean: 2567450.933333333</li>
+                <li>Median: 1365101.55</li>
+                <li>Standard Deviation: 2680628.68306423</li>
+            </ul>
+
+            <h3>Carbon monoxide (CO)</h3>
+            <ul>
+                <li>Mean: 6134432.0675438605</li>
+                <li>Median: 5409311.0</li>
+                <li>Standard Deviation: 2731201.5426488183</li>
+            </ul>
+
+            <h3>Organic Carbon</h3>
+            <ul>
+                <li>Mean: 180839.66305263157</li>
+                <li>Median: 135501.77000000002</li>
+                <li>Standard Deviation: 112325.12562412978</li>
+            </ul>
+
+            <h3>Non-methane Volatile Organic Compounds (NMVOC)</h3>
+            <ul>
+                <li>Mean: 1232476.6124999998</li>
+                <li>Median: 908683.8999999999</li>
+                <li>Standard Deviation: 1013200.5206792387</li>
+            </ul>
+
+            <h3>Black Carbon</h3>
+            <ul>
+                <li>Mean: 70612.26694078947</li>
+                <li>Median: 62819.393</li>
+                <li>Standard Deviation: 50713.56042621894</li>
+            </ul>
+
+            <h3>Ammonia (NH₃)</h3>
+            <ul>
+                <li>Mean: 345913.73128947365</li>
+                <li>Median: 283107.62</li>
+                <li>Standard Deviation: 240736.67324133392</li>
+            </ul>
+
+###
+import pytest
+
+from fastapi.testclient import TestClient
+
+from app.main import app
+
+client = TestClient(app)
+
+
+def test_main_endpoint():
+    response = client.get("/")
+
+    assert response.status_code == 200
+
+    assert "<h1>Welcome to Air Pollution Data Viewer</h1>" in response.text
+
+    assert "<form action=\"/get_stats/\" method=\"post\">" in response.text
+
+    assert "<label for=\"entity\">Select an entity:</label>" in response.text
+
+    assert "<input type=\"submit\" value=\"Show Statistics\">" in response.text
