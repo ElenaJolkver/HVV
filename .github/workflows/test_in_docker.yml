@@ -27,6 +27,8 @@ jobs:
     - name: Check Docker container status
       run: docker ps -a
 
+
+
     - name: Inspect Docker logs
       run: docker logs hvv_container
 
@@ -34,6 +36,9 @@ jobs:
       id: get_docker_id
       run: |
         echo "container_id=$(docker ps -qf 'ancestor=hvv_docker')" >> $GITHUB_ENV
+    
+    - name: start container
+      run: docker start ${{ env.container_id }}
 
     - name: Get Docker container IP
       id: get_docker_ip
