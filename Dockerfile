@@ -2,7 +2,7 @@
 FROM python:3.12
 
 # Set the working directory in the container
-WORKDIR /src
+WORKDIR app/
 
 # Create an Environment variable for the app to use
 ENV AM_I_IN_A_DOCKER_CONTAINER="1"
@@ -11,13 +11,10 @@ ENV AM_I_IN_A_DOCKER_CONTAINER="1"
 RUN pip install --no-cache-dir poetry
 
 # Copy the pyproject.toml and poetry.lock files (if available) into the container
-COPY pyproject.toml poetry.lock* ./
+COPY . .
 
 # Configure Poetry
 RUN poetry config virtualenvs.create false
-
-# Copy the current directory contents into the container at /app
-COPY . .
 
 # Install dependencies using Poetry
 RUN poetry install --no-dev --no-interaction --no-ansi
@@ -26,4 +23,4 @@ RUN poetry install --no-dev --no-interaction --no-ansi
 EXPOSE 8000
 
 # Run the FastAPI app with Uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8000"]

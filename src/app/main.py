@@ -17,10 +17,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import create_engine, select, func, text
 
 # Importing the database models and session configuration.
-if SECRET_KEY:
-    from app.setup_database.models import AirPollutionData, SessionLocal, Base
-else:
-    from setup_database.models import AirPollutionData, SessionLocal, Base #when executing the file directly, without docker
+from app.setup_database.models import AirPollutionData, SessionLocal, Base
 
 # Pandas is used for data manipulation and analysis.
 import pandas as pd
@@ -44,11 +41,8 @@ from datetime import datetime
 logger = logging.getLogger("my_logger")
 logger.setLevel(logging.INFO)
 
-# Create a file handler that logs messages to a file
-if SECRET_KEY:
-    log_file = "/app/src/app/logs/app.log"
-else:
-    log_file = os.path.join(os.path.dirname(__file__), '../..', 'logs/app.log') #when executing the file directly, without docker
+
+log_file = os.path.join(os.path.dirname(__file__), '../..', 'logs/app.log') #when executing the file directly, without docker
 
 file_handler = RotatingFileHandler(log_file, maxBytes=2000, backupCount=5)
 file_handler.setLevel(logging.INFO)
