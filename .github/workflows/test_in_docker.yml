@@ -22,7 +22,7 @@ jobs:
 
     - name: Run Docker container
       run: |
-        docker run -d -p 8000:8000 -v "$(pwd)/logs:/app/src/app/logs" --name hvv_container hvv_docker
+        docker run -d -p 8000:8000 -v "$(pwd)/logs:/app/logs" --name hvv_container hvv_docker
 
     - name: Check Docker container status
       run: docker ps -a
