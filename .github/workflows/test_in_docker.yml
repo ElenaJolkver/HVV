@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dev
+      - git_testing # remove after merging git_testing branch
 
 jobs:
   test:
