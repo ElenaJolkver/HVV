@@ -166,5 +166,5 @@ cython_debug/
 # pytest coverage report
 .coverage
 
-# game_stats_plot.html to avoid failing pytest-cov pre-commit hook
-game_stats_plot.html
+# logs from running the app
+logs/

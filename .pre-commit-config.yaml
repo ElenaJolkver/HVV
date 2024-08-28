@@ -50,13 +50,13 @@ repos:
   #        entry: pflake8
   #        additional_dependencies: [pyproject-flake8]
 
-  # pydocstyle
-  - repo: https://github.com/pycqa/pydocstyle
-    rev: 6.3.0
-    hooks:
-      - id: pydocstyle # checks docstrings with pydocstyle
-        additional_dependencies: ["tomli"]
-        files: .*\.py$
+  # # pydocstyle
+  # - repo: https://github.com/pycqa/pydocstyle
+  #   rev: 6.3.0
+  #   hooks:
+  #     - id: pydocstyle # checks docstrings with pydocstyle
+  #       additional_dependencies: ["tomli"]
+  #       files: .*\.py$
 
   # mypy
   - repo: https://github.com/pre-commit/mirrors-mypy

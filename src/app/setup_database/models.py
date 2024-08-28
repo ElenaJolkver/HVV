@@ -1,15 +1,16 @@
 # Importing necessary SQLAlchemy components for defining models and creating the engine
-from sqlalchemy import Column, Integer, String, Float, create_engine
+from sqlalchemy import Column, Float, Integer, String, create_engine
+
 # Importing sessionmaker for session creation and declarative_base for model base class
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import DeclarativeMeta, declarative_base, sessionmaker
 
 # Create a base class for declarative class definitions
-Base = declarative_base()
+Base: DeclarativeMeta = declarative_base()
 
 
 # Define the AirPollutionData model
 class AirPollutionData(Base):
-    __tablename__ = 'air_pollution_data'  # Name of the table in the database
+    __tablename__ = "air_pollution_data"  # Name of the table in the database
 
     # Define columns in the table
     id = Column(Integer, primary_key=True, index=True)  # Primary key column

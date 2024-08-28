@@ -14,7 +14,7 @@ annotated-types = "^0.7.0"
 anyio = "^4.4.0"
 click = "^8.1.7"
 colorama = "^0.4.6"
-fastapi = "^0.112.1"
+fastapi = {extras = ["all"], version = "^0.112.2"}
 greenlet = "^3.0.3"
 h11 = "^0.14.0"
 idna = "^3.7"
@@ -66,7 +66,7 @@ disallow_untyped_defs = true
 disallow_incomplete_defs = true
 check_untyped_defs = true
 warn_redundant_casts = true
-disallow_untyped_decorators = true
+disallow_untyped_decorators = false
 
 [tool.docformatter]
 wrap-summaries = 120

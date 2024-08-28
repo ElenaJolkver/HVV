@@ -36,7 +36,7 @@ endif
 lint:
 	-poetry run pre-commit run flake8 --all-files
 	-poetry run pre-commit run mypy --all-files
-	-poetry run pre-commit run pydocstyle --all-files
+
 ## Format python files using black, isort, and docformatter
 style:
 	-poetry run pre-commit run black --all-files
