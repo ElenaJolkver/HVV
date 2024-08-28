@@ -1,46 +1,44 @@
-name: Test in Docker
+name: Test in Poetry environment
+
 on:
   push:
     branches:
       - dev
-      - git_testing # remove after testing
 
 jobs:
   test:
-
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip-ci]')"
 
     steps:
     - uses: actions/checkout@v2
 
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.12
+
     - name: Build Docker image
-      run: |
-        docker build -t hvv_docker .
+      run: docker build -t hvv_docker .
 
-    - name: Start service in Docker container
-      run: |
-        docker run -d --name hvv_docker_container -p 8000:8000 hvv_docker
-
-    - name: Wait for service to be ready
-      run: |
-        sleep 10  # Adjust the sleep time as needed to ensure the service is ready
+    - name: Run Docker container
+      run: docker run -d --name hvv_docker_container hvv_docker
 
     - name: Get Docker container ID
       id: get_docker_id
       run: |
-        echo "::set-output name=container_id::$(docker ps -qf 'ancestor=hvv_docker')"
+        echo "container_id=$(docker ps -qf 'ancestor=hvv_docker')" >> $GITHUB_ENV
 
     - name: Test POST with curl
       run: |
-        docker exec -it ${{ steps.get_docker_id.outputs.container_id }} curl -X POST "http://localhost:8000/data" -H "Content-Type: application/json" -d '{"entity": "An Example Entity", "year": 2023, "nitrogen_oxide": 10.5, "sulphur_dioxide": 5.2, "carbon_monoxide": 3.1, "organic_carbon": 2.0, "nmvoc": 1.5, "black_carbon": 0.8, "ammonia": 0.6}'
+        docker exec ${{ env.container_id }} curl -X POST "http://localhost:8000/data" -H "Content-Type: application/json" -d '{"entity": "An Example Entity", "year": 2023, "nitrogen_oxide": 10.5, "sulphur_dioxide": 5.2, "carbon_monoxide": 3.1, "organic_carbon": 2.0, "nmvoc": 1.5, "black_carbon": 0.8, "ammonia": 0.6}'
 
     - name: Test DELETE with curl
       run: |
-        docker exec -it ${{ steps.get_docker_id.outputs.container_id }} curl -X DELETE "http://localhost:8000/data/An%20Example%20Entity/2023"
+        docker exec ${{ env.container_id }} curl -X DELETE "http://localhost:8000/data/An%20Example%20Entity/2023"
 
     - name: Stop and remove Docker container
       run: |
-        docker stop ${{ steps.get_docker_id.outputs.container_id }}
-        docker rm ${{ steps.get_docker_id.outputs.container_id }}
+        docker stop ${{ env.container_id }}
+        docker rm ${{ env.container_id }}
         docker rmi hvv_docker
