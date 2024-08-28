@@ -23,7 +23,7 @@ jobs:
       run: docker build -t hvv_docker .
 
     - name: Run Docker container
-      run: docker run -d -p 8000:8000 -v "$(pwd)/logs:/app/src/app/logs" hvv_docker --name hvv_docker_container
+      run: docker run -d -p 8000:8000 -v "$(pwd)/logs:/app/src/app/logs" --name hvv_container hvv_docker
 
     - name: Get Docker container ID
       id: get_docker_id
@@ -38,7 +38,7 @@ jobs:
     
     - name: Check if service is running
       run: |
-        docker exec ${{ env.container_id }} pgrep -a hvv_docker_container && echo "Service is running" || echo "Service not running"
+        docker exec ${{ env.container_id }} pgrep -a hvv_container && echo "Service is running" || echo "Service not running"
       
         
     - name: Check if port 8000 is open
