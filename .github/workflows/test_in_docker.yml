@@ -36,13 +36,22 @@ jobs:
         container_ip=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${{ env.container_id }})
         echo "container_ip=$container_ip" >> $GITHUB_ENV
     
-    - name: Check if service is  running
+    - name: Check if service is running
       run: |
-        docker exec ${{ env.container_id }} pgrep -a <service_name> || echo "Service not running"
+        if docker exec ${{ env.container_id }} pgrep -a <service_name>; then
+          echo "Service is running"
+        else
+          echo "Service not running"
+        fi
+      
         
     - name: Check if port 8000 is open
       run: |
-        docker exec ${{ env.container_id }} netstat -tuln | grep ':8000' || echo "Port 8000 not open"
+        if docker exec ${{ env.container_id }} netstat -tuln | grep ':8000'; then
+          echo "Port 8000 is open"
+        else
+          echo "Port 8000 not open"
+        fi
         
     - name: Test POST with curl
       run: |
