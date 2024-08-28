@@ -38,20 +38,12 @@ jobs:
     
     - name: Check if service is running
       run: |
-        if docker exec ${{ env.container_id }} pgrep -a <service_name>; then
-          echo "Service is running"
-        else
-          echo "Service not running"
-        fi
+        docker exec ${{ env.container_id }} pgrep -a <service_name> && echo "Service is running" || echo "Service not running"
       
         
     - name: Check if port 8000 is open
       run: |
-        if docker exec ${{ env.container_id }} netstat -tuln | grep ':8000'; then
-          echo "Port 8000 is open"
-        else
-          echo "Port 8000 not open"
-        fi
+        docker exec ${{ env.container_id }} netstat -tuln | grep ':8000' && echo "Port 8000 is open" || echo "Port 8000 not open"
         
     - name: Test POST with curl
       run: |
