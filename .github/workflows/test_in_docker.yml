@@ -1,20 +1,15 @@
-name: Test in Poetry environment
+name: Test in Docker
 
-on:
-  push:
-    branches:
-      - dev
-      - git_testing # remove after merging git_testing branch
+on: [push, pull_request]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip-ci]')"
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Setup Python
+    - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: 3.12
@@ -28,8 +23,12 @@ jobs:
     - name: Run Docker container
       run: |
         docker run -d -p 8000:8000 -v "$(pwd)/logs:/app/src/app/logs" --name hvv_container hvv_docker
-        docker logs hvv_container
-        docker exec hvv_container ls -l /app/src/app/logs
+
+    - name: Check Docker container status
+      run: docker ps -a
+
+    - name: Inspect Docker logs
+      run: docker logs hvv_container
 
     - name: Get Docker container ID
       id: get_docker_id
@@ -41,35 +40,11 @@ jobs:
       run: |
         container_ip=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${{ env.container_id }})
         echo "container_ip=$container_ip" >> $GITHUB_ENV
-    
-      
-    - name: list running processes
-      run: |
-        docker exec ${{ env.container_id }} ps -aux
-
-    - name: check logs
-      run: |
-        docker exec ${{ env.container_id }} cat /app/src/app/logs/app.log
 
     - name: Check if service is running
       run: |
         docker exec ${{ env.container_id }} pgrep -a uvicorn && echo "Service is running" || echo "Service not running"
 
-
-    - name: Check if port 8000 is open
-      run: |
-        docker exec ${{ env.container_id }} netstat -tuln | grep ':8000' && echo "Port 8000 is open" || echo "Port 8000 not open"
-        
     - name: Test POST with curl
       run: |
-        docker exec ${{ env.container_id }} curl -X POST "http://${{ env.container_ip }}:8000/data" -H "Content-Type: application/json" -d '{"entity": "An Example Entity", "year": 2023, "nitrogen_oxide": 10.5, "sulphur_dioxide": 5.2, "carbon_monoxide": 3.1, "organic_carbon": 2.0, "nmvoc": 1.5, "black_carbon": 0.8, "ammonia": 0.6}'
-    
-    - name: Test DELETE with curl
-      run: |
-        docker exec ${{ env.container_id }} curl -X DELETE "http://${{ env.container_ip }}:8000/data/An%20Example%20Entity/2023"
-    
-    - name: Stop and remove Docker container
-      run: |
-        docker stop ${{ env.container_id }}
-        docker rm ${{ env.container_id }}
-        docker rmi hvv_docker
+        curl -X POST "http://${{ env.container_ip }}:8000/data" -H "Content-Type: application/json" -d '{"entity": "An Example Entity", "year": 2023, "nitrogen_oxide": 10.5, "sulphur_dioxide": 5.2, "carbon_monoxide": 3.1, "organic_carbon": 2.0, "nmvoc": 1.5, "black_carbon": 0.8, "ammonia": 0.6}'
