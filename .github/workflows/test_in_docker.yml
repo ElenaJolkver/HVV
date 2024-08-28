@@ -50,7 +50,7 @@ jobs:
 
     - name: Check if service is running
       run: |
-        docker exec ${{ env.container_id }} pgrep -a hvv_container && echo "Service is running" || echo "Service not running"
+        docker exec ${{ env.container_id }} pgrep -a uvicorn && echo "Service is running" || echo "Service not running"
 
 
     - name: Check if port 8000 is open
