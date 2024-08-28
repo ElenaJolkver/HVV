@@ -26,7 +26,10 @@ jobs:
       run: docker build -t hvv_docker .
 
     - name: Run Docker container
-      run: docker run -d -p 8000:8000 -v "$(pwd)/logs:/app/src/app/logs" --name hvv_container hvv_docker
+      run: |
+        docker run -d -p 8000:8000 -v "$(pwd)/logs:/app/src/app/logs" --name hvv_container hvv_docker
+        docker logs hvv_container
+        docker exec hvv_container ls -l /app/src/app/logs
 
     - name: Get Docker container ID
       id: get_docker_id
