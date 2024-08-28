@@ -23,7 +23,7 @@ jobs:
       run: docker build -t hvv_docker .
 
     - name: Run Docker container
-      run: docker run -d --name hvv_docker_container hvv_docker
+      run: docker run -d -p 8000:8000 -v "$(pwd)/logs:/app/src/app/logs" hvv_docker
 
     - name: Get Docker container ID
       id: get_docker_id
@@ -34,7 +34,6 @@ jobs:
       id: get_docker_ip
       run: |
         echo "container_ip=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${{ env.container_id }})" >> $GITHUB_ENV
-
 
     - name: Test POST with curl
       run: |
