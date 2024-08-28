@@ -36,7 +36,7 @@ jobs:
         container_ip=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${{ env.container_id }})
         echo "container_ip=$container_ip" >> $GITHUB_ENV
     
-    - name: Check if service is running
+    - name: Check if service is  running
       run: |
         docker exec ${{ env.container_id }} pgrep -a <service_name> || echo "Service not running"
         
