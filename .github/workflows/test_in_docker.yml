@@ -1,9 +1,10 @@
 name: Test in Docker
 
-on: push
-  branches:
-        - dev
-        - git_testing # remove after
+on:
+  push:
+    branches:
+      - dev
+      - git_testing # remove after
 
 jobs:
   test:
