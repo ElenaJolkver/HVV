@@ -2,11 +2,14 @@ name: Build and Push Docker Image
 
 on:
   workflow_run:
-    workflows: ["Test in Poetry Environment"]  # The name of the workflow as defined in its 'name' field
+    workflows:
+      - "Test in Docker"
+      # - "Test in Poetry environment"
     types:
       - completed
     branches:
-      - Develop
+      - dev
+      - push_to_container_repo # remove after testing
 
 jobs:
   build-and-push:
@@ -29,4 +32,6 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ghcr.io/${{ github.repository }}/app-name:${{ github.sha }}
+        tags: |
+          ghcr.io/${{ github.repository_owner }}/app-name:latest
+          ghcr.io/${{ github.repository }}/app-name:${{ github.sha }}
