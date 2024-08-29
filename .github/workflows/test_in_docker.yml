@@ -22,12 +22,13 @@ jobs:
 
     - name: Run Docker container
       run: |
-        docker run -d -p 8000:8000 -v "$(pwd)/logs:/app/logs" --name hvv_container hvv_docker
+        docker run -d -p 8000:8000 -v "$(pwd)/logs:/app/src/app/logs" --name hvv_container hvv_docker
+
+    - name: sleep for 10 seconds
+      run: sleep 10
 
     - name: Check Docker container status
       run: docker ps -a
-
-
 
     - name: Inspect Docker logs
       run: docker logs hvv_container
@@ -36,7 +37,7 @@ jobs:
       id: get_docker_id
       run: |
         echo "container_id=$(docker ps -qf 'ancestor=hvv_docker')" >> $GITHUB_ENV
-    
+
     - name: start container
       run: docker start ${{ env.container_id }}
 
@@ -53,3 +54,9 @@ jobs:
     - name: Test POST with curl
       run: |
         docker exec ${{ env.container_id }} curl -X POST "http://localhost:8000/data" -H "Content-Type: application/json" -d '{\"entity\": \"An Example Entity\", \"year\": 2023, \"nitrogen_oxide\": 10.5, \"sulphur_dioxide\": 5.2, \"carbon_monoxide\": 3.1, \"organic_carbon\": 2.0, \"nmvoc\": 1.5, \"black_carbon\": 0.8, \"ammonia\": 0.6}'
+
+    - name: Terminate docker
+      run: |
+        docker stop ${{ env.container_id }}
+        docker rm ${{ env.container_id }}
+        docker rmi hvv_docker

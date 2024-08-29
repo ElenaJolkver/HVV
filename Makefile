@@ -1,4 +1,4 @@
-.PHONY: clean test create_environment
+.PHONY: clean test create_environment lint style
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -32,6 +32,17 @@ ifeq ($(HAS_Poetry),)
 endif
 	@echo ">>> Creating a new Python environment using Poetry."
 	@poetry install
+## Lint python files using flake8 and mypy
+lint:
+	-poetry run pre-commit run flake8 --all-files
+	-poetry run pre-commit run mypy --all-files
+
+## Format python files using black, isort, and docformatter
+style:
+	-poetry run pre-commit run black --all-files
+	-poetry run pre-commit run isort --all-files
+	-poetry run pre-commit run docformatter --all-files
+
 
 
 #################################################################################

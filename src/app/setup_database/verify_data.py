@@ -1,10 +1,10 @@
 # Importing Session for database session management
-from sqlalchemy.orm import Session
 # Importing the AirPollutionData model and SessionLocal session factory
 from models import AirPollutionData, SessionLocal
+from sqlalchemy.orm import Session
 
 
-def verify_data():
+def verify_data() -> None:
     # Create a new database session
     db: Session = SessionLocal()
 

@@ -1,0 +1,74 @@
+repos:
+  # pre-commit-hooks
+  - repo: "https://github.com/pre-commit/pre-commit-hooks"
+    rev: v4.6.0
+    hooks:
+      - id: check-added-large-files # checks for large files
+      - id: check-merge-conflict #checks for merge conflicts
+      - id: debug-statements # checks for debugger imports
+      - id: end-of-file-fixer # makes sure file ends in newline
+        exclude: (^docs/_build/|.*\.html$)
+      - id: mixed-line-ending # fixes mixed line endings (e.g. crlf, lf ,no)
+      - id: no-commit-to-branch # prevents commiting to the wrong branch
+        args: [--branch, main, --branch, develop]
+      - id: trailing-whitespace # Trims trailing whitespace
+        exclude: (^docs/_build/|.*\.html$|^CHANGELOG\.md$)
+        args: ["--markdown-linebreak-ext=md"] # but preserves Markdown hard linebreaks
+
+  # black
+  - repo: https://github.com/psf/black
+    rev: 24.8.0
+    hooks:
+      - id: black
+        name: black
+        args: ["--config", "pyproject.toml"]
+
+  #isort
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort (python)
+        args: ["--profile", "black"]
+        files: .*\.py$
+
+  #docformatter
+  - repo: https://github.com/PyCQA/docformatter
+    rev: v1.7.5
+    hooks:
+      - id: docformatter
+        additional_dependencies: [tomli]
+        args: [--in-place, --config, ./pyproject.toml, --black, --force-wrap]
+        files: .*\.py$
+
+  # flake8
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8 # runs flake8
+        files: .*\.py$
+  #        entry: pflake8
+  #        additional_dependencies: [pyproject-flake8]
+
+  # # pydocstyle
+  # - repo: https://github.com/pycqa/pydocstyle
+  #   rev: 6.3.0
+  #   hooks:
+  #     - id: pydocstyle # checks docstrings with pydocstyle
+  #       additional_dependencies: ["tomli"]
+  #       files: .*\.py$
+
+  # mypy
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.11.2 # Use the sha / tag you want to point at
+    hooks:
+      - id: mypy
+        args: [--config-file, pyproject.toml]
+        files: ^src/.*\.py$
+
+# poetry
+  - repo: https://github.com/python-poetry/poetry
+    rev: 1.8.0
+    hooks:
+    - id: poetry-check # makes sure that poetry files are consistent
+    - id: poetry-lock # makes sure that poetry.lock is up to date
