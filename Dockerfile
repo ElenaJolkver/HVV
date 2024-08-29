@@ -1,6 +1,9 @@
 # Use an official Python runtime as a parent image
 FROM python:3.12-slim
 
+# Install curl
+RUN apt-get update && apt-get install -y curl && apt-get clean
+
 # Set the working directory in the container
 WORKDIR app/
 # Create an Environment variable for the app to use
