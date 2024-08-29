@@ -3,8 +3,8 @@ name: Test in Poetry environment
 on:
   push:
     branches:
-      - Develop
-      - ci_cd_infrastructure
+      - dev
+
 
 
 jobs:

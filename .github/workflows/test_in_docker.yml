@@ -1,0 +1,72 @@
+name: Test in Docker
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.12
+
+    - name: Set up Docker-in-Docker
+      uses: docker/setup-buildx-action@v1
+
+    - name: Build Docker image
+      run: docker build -t hvv_docker .
+
+    - name: Run Docker container
+      run: |
+        docker run -d -p 8000:8000 -v "$(pwd)/logs:/app/src/app/logs" --name hvv_container hvv_docker
+
+    - name: sleep for 10 seconds
+      run: sleep 10
+
+    - name: Check Docker container status
+      run: docker ps -a
+
+    - name: Inspect Docker logs
+      run: docker logs hvv_container
+
+    - name: Get Docker container ID
+      id: get_docker_id
+      run: |
+        echo "container_id=$(docker ps -qf 'ancestor=hvv_docker')" >> $GITHUB_ENV
+
+    - name: Test POST with curl
+      run: |
+        docker exec ${{ env.container_id }} curl -X POST "http://localhost:8000/data" \
+        -H "Content-Type: application/json" \
+        -d '{"entity": "An Example Entity", "year": 2023, "nitrogen_oxide": 10.5, "sulphur_dioxide": 5.2, "carbon_monoxide": 3.1, "organic_carbon": 2.0, "nmvoc": 1.5, "black_carbon": 0.8, "ammonia": 0.6}'
+
+    - name: Test Put with curl
+      run: |
+        docker exec ${{ env.container_id }} curl -X PUT "http://localhost:8000/data/An%20Example%20Entity/2023" \
+        -H "Content-Type: application/json" \
+        -d '{"entity": "An Example Entity", "year": 2023, "nitrogen_oxide": 12.5, "sulphur_dioxide": 5.2, "carbon_monoxide": 3.1, "organic_carbon": 2.0, "nmvoc": 1.5, "black_carbon": 0.8, "ammonia": 0.6}'
+
+    - name: Test Delete with curl
+      run: |
+        response=$(docker exec ${{ env.container_id }} curl -s -X DELETE "http://localhost:8000/data/An%20Example%20Entity/2023")
+        echo "Response: $response"
+        if [[ "$response" == *"Data point for An Example Entity in 2023 has been deleted successfully."* ]]; then
+          echo "Delete test passed."
+        else
+          echo "Delete test failed."
+          exit 1
+        fi
+
+    - name: Terminate docker
+      if: always()
+      run: |
+        docker stop ${{ env.container_id }}
+        docker rm ${{ env.container_id }}
+        docker rmi hvv_docker

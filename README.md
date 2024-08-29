@@ -178,7 +178,7 @@ docker exec -it <your docker container ID> curl -X POST "http://localhost:8000/d
 
 Updating data with curl:
 ```
-curl -X PUT "http://localhost:8000/data/An%Example%20Entity/2023" -H "Content-Type: application/json" -d '{
+curl -X PUT "http://localhost:8000/data/An%20Example%20Entity/2023" -H "Content-Type: application/json" -d '{
   "entity": "An Example Entity",
   "year": 2023,
   "nitrogen_oxide": 12.0,
@@ -231,7 +231,7 @@ docker exec -it <your docker container ID> curl -X PUT "http://localhost:8000/da
 Delete data with curl
 
 ```
-curl -X DELETE "http://localhost:8000/data/An%Example%20Entity/2023"
+curl -X DELETE "http://localhost:8000/data/An%20Example%20Entity/2023"
 ```
 
 Delete data with windows powershell
