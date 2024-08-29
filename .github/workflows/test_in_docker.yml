@@ -62,7 +62,14 @@ jobs:
 
     - name: Test Delete with curl
       run: |
-        docker exec ${{ env.container_id }} curl -X DELETE "http://localhost:8000/data/An%20Example%20Entity/2023"
+        response=$(docker exec ${{ env.container_id }} curl -s -X DELETE "http://localhost:8000/data/An%20Example%20Entity/2023")
+        echo "Response: $response"
+        if [[ "$response" == *"Data point for An Example Entity in 2023 has been deleted successfully."* ]]; then
+          echo "Delete test passed."
+        else
+          echo "Delete test failed."
+          exit 1
+        fi
 
     - name: Terminate docker
       if: always()
