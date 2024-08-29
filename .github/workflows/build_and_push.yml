@@ -10,6 +10,10 @@ on:
       - dev
       - push_to_container_repo # remove after testing
 
+permissions:
+  contents: write  # Allows write access to contents, which might be necessary for certain actions
+  packages: write  # Allows write access to GitHub Packages (e.g., pushing Docker images)
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
