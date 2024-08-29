@@ -2,10 +2,10 @@ name: Build and Push Docker Image
 
 on:
   workflow_run:
-    workflows: ["Test in Docker"]
+    workflows: [Test in Docker]
       # - "Test in Poetry environment"
     types:
-      - success
+      - completed
     branches:
       - dev
       - push_to_container_repo # remove after testing
