@@ -1,23 +1,26 @@
 # Use an official Python runtime as a parent image
-FROM python:3.12
+FROM python:3.12-slim
 
 # Set the working directory in the container
 WORKDIR app/
-
 # Create an Environment variable for the app to use
 ENV AM_I_IN_A_DOCKER_CONTAINER="1"
 
 # Install Poetry
 RUN pip install --no-cache-dir poetry
 
-# Copy the pyproject.toml and poetry.lock files (if available) into the container
+# Copy the current directory contents into the container at /app
 COPY . .
 
-# Configure Poetry
-RUN poetry config virtualenvs.create false
+# Configure Poetry and install dependencies in a single RUN step
+RUN poetry config virtualenvs.create false && \
+    poetry install --no-dev --no-interaction --no-ansi && \
+    # Remove Poetry after installing dependencies to save space
+    pip uninstall -y poetry && \
+    # Clean up pip cache and other unnecessary files
+    rm -rf /root/.cache/pip && \
+    rm -rf /root/.cache/pypoetry
 
-# Install dependencies using Poetry
-RUN poetry install --no-dev --no-interaction --no-ansi
 
 # Expose port 8000 to the outside world
 EXPOSE 8000

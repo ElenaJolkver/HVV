@@ -57,3 +57,9 @@ tests/
 *.tmp
 
 *.swp
+
+# Ignore big unused files
+data/*
+
+# Ignore pre-commit hooks
+.pre-commit-config.yaml

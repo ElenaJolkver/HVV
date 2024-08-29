@@ -167,4 +167,4 @@ cython_debug/
 .coverage
 
 # logs from running the app
-logs/
+logs/*

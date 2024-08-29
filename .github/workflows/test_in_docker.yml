@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dev
+      - push_to_container_repo # remove after testing
 
 jobs:
   test:
