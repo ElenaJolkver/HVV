@@ -6,7 +6,7 @@ on:
       - "Test in Docker"
       # - "Test in Poetry environment"
     types:
-      - completed
+      - success
     branches:
       - dev
       - push_to_container_repo # remove after testing
@@ -33,5 +33,5 @@ jobs:
         file: ./Dockerfile
         push: true
         tags: |
-          ghcr.io/${{ github.repository_owner }}/app-name:latest
-          ghcr.io/${{ github.repository }}/app-name:${{ github.sha }}
+          ghcr.io/${{ github.repository_owner }}/hvv_app:latest
+          ghcr.io/${{ github.repository }}/hvv_app:${{ github.sha }}
